@@ -1,10 +1,12 @@
+import os
+import cv2
+import io
+import torch
+import base64
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
-import os
-import torch
 from facenet_pytorch import MTCNN
 from PIL import Image
-import cv2
 import numpy as np
 from torchvision import transforms
 from model_classes import SPACING # Required fir Spacing model
@@ -41,7 +43,7 @@ def load_models():
         "title": "Lipline",
         "description": "This model predicts the lip line",
         "model": torch.load('models/libline.pth', map_location=device),
-        "classes": ["low", "medium", "high"],
+        "labels": ["Low", "Medium", "High"],
         "transform": common_transformer,
         "edge": True
     }
@@ -49,7 +51,7 @@ def load_models():
         "title": "Smile Arc",
         "description": "This model predicts the smile arc",
         "model": torch.load('models/smile_arc.pth'),
-        "classes": ['Flat', 'Reverse', 'Parallel'],
+        "labels": ['Flat', 'Reverse', 'Parallel'],
         "edge": False,
         "transform": common_transformer
     }
@@ -57,7 +59,7 @@ def load_models():
         "title": "Buccal Corridor",
         "description": "This model predicts the buccal corridor",
         "model": torch.load('models/buccal.pth'),
-        "classes": ['Narrow', 'Medium', 'High'],
+        "labels": ['Narrow', 'Medium', 'High'],
         "edge": False,
         "transform": common_transformer
     }
@@ -65,7 +67,7 @@ def load_models():
         "title": "Spacing",
         "description": "This model predicts the spacing between teeth",
         "model": torch.load('models/spacing.pth'),
-        "classes": ['No Spacing', 'Spacing'],
+        "labels": ['No Spacing', 'Spacing'],
         "edge": False,
         "transform": common_transformer
     }
@@ -115,11 +117,13 @@ def predict_from_multiple_models(mouth_crop, models):
             image_tensor = aug_img.unsqueeze(0).to(device)
             outputs = model['model'](image_tensor)
         probabilities = torch.nn.functional.softmax(outputs, dim=1)
+
         predictions.append({
             "title": model['title'],
             "description": model['description'],
-            "classes": model['classes'],
-            "prediction": probabilities.detach().cpu().numpy().tolist()[0],
+            "labels": model['labels'],
+            "classes": probabilities.detach().cpu().numpy().tolist()[0],
+            "predictedIndex": torch.argmax(probabilities).item()
         })
     return predictions
 
@@ -143,7 +147,15 @@ def upload_file():
             predictions = predict_from_multiple_models(mouth_crop, models)
             print(predictions)
             # Return the result
-            return jsonify(predictions), 200
+
+            img_byte_arr = io.BytesIO()
+            mouth_crop.save(img_byte_arr, format='JPEG')
+            img_byte_arr = img_byte_arr.getvalue()
+            base64_img = base64.b64encode(img_byte_arr).decode('utf-8')
+            return jsonify({
+                "image": base64_img,
+                "predictions": predictions
+            }), 200
     
     
 

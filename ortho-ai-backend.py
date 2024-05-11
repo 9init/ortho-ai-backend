@@ -150,7 +150,6 @@ def upload_file():
         
         if mouth_crop is not None:
             predictions = predict_from_multiple_models(mouth_crop, models)
-            print(predictions)
             # Return the result
 
             img_byte_arr = io.BytesIO()

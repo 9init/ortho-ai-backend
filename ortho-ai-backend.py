@@ -76,8 +76,16 @@ def load_models():
         "edge": False,
         "transform": common_transformer
     }
+    tooth_decay_model = {
+        "title": "Tooth Decay",
+        "description": "This model predicts the tooth decay",
+        "model": torch.load('models/tooth-decay.pth', map_location=device),
+        "labels": ['Decay', 'No Decay'],
+        "edge": False,
+        "transform": common_transformer
+    }
     
-    return [lipline_model, smile_arc_model, buccal_model, spacing_model]
+    return [lipline_model, smile_arc_model, buccal_model, spacing_model, tooth_decay_model]
 
 models = load_models()
 

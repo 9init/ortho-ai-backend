@@ -36,6 +36,11 @@ def get_edge_triangle_blur(image):
 
 common_transformer = transforms.Compose([
     transforms.Resize((256, 256), antialias=True),
+    transforms.RandomApply([
+        transforms.RandomAffine(0),
+        transforms.ColorJitter(),
+        transforms.GaussianBlur(5),
+    ]),
 ])
 
 def load_models():

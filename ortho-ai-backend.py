@@ -50,7 +50,7 @@ def load_models():
     smile_arc_model = {
         "title": "Smile Arc",
         "description": "This model predicts the smile arc",
-        "model": torch.load('models/smile_arc.pth'),
+        "model": torch.load('models/smile_arc.pth', map_location=device),
         "labels": ['Flat', 'Reverse', 'Parallel'],
         "edge": False,
         "transform": common_transformer
@@ -58,7 +58,7 @@ def load_models():
     buccal_model = {
         "title": "Buccal Corridor",
         "description": "This model predicts the buccal corridor",
-        "model": torch.load('models/buccal.pth'),
+        "model": torch.load('models/buccal.pth', map_location=device),
         "labels": ['Narrow', 'Medium', 'High'],
         "edge": False,
         "transform": common_transformer
@@ -66,7 +66,7 @@ def load_models():
     spacing_model = {
         "title": "Spacing",
         "description": "This model predicts the spacing between teeth",
-        "model": torch.load('models/spacing.pth'),
+        "model": torch.load('models/spacing.pth', map_location=device),
         "labels": ['No Spacing', 'Spacing'],
         "edge": False,
         "transform": common_transformer

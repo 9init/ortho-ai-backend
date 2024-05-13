@@ -43,42 +43,73 @@ common_transformer = transforms.Compose([
     ]),
 ])
 
+description = {
+    "lipline": [
+        "the smile may considered balanced and aesthetically pleasing and some doctor may recommend lip augmentation to increase the vertical distance between the upper lip and the upper incisal edges of the teeth.",
+        "the smile is considered balanced and aesthetically pleasing.",
+        "the smile is considered gummy and may require lip repositioning surgery to reduce the amount of gum tissue that is exposed when smiling."
+    ],
+    "smile_arc": [
+        "the smile is considered unattractive and may require orthodontic treatment to correct.",
+        "the smile is considered unattractive and may require orthodontic treatment to correct.",
+        "the smile is considered balanced and aesthetically pleasing."
+    ],
+    "buccal": [
+        "the smile is considered balanced and aesthetically pleasing.",
+        "the smile is considered balanced and aesthetically pleasing.",
+        "the smile is considered unattractive and may require orthodontic treatment to correct."
+    ],
+    "spacing": [
+        "the smile is considered balanced and aesthetically pleasing.",
+        "the smile is considered unattractive and may require orthodontic treatment or dental bonding to correct."
+    ],
+    "tooth_decay": [
+        "the smile is considered unattractive and may require dental treatment to correct.",
+        "the smile is considered balanced and aesthetically pleasing."
+    ]
+}
+
 def load_models():
     lipline_model = {
+        "id": "lipline",
         "title": "Lipline",
-        "description": "This model predicts the lip line",
+        "description": "The curve of the upper lip when smiling.",
         "model": torch.load('models/libline.pth', map_location=device),
         "labels": ["Low", "Medium", "High"],
         "transform": common_transformer,
         "edge": True
     }
     smile_arc_model = {
+        "id": "smile_arc",
         "title": "Smile Arc",
-        "description": "This model predicts the smile arc",
+        "description": "The curve of the upper incisal edges of the teeth.",
         "model": torch.load('models/smile_arc.pth', map_location=device),
         "labels": ['Flat', 'Reverse', 'Parallel'],
         "edge": False,
         "transform": common_transformer
     }
     buccal_model = {
+        "id": "buccal",
         "title": "Buccal Corridor",
-        "description": "This model predicts the buccal corridor",
+        "description": "The dark space between the corners of the mouth and the buccal surfaces of the teeth.",
         "model": torch.load('models/buccal.pth', map_location=device),
         "labels": ['Narrow', 'Medium', 'High'],
         "edge": False,
         "transform": common_transformer
     }
     spacing_model = {
+        "id": "spacing",
         "title": "Spacing",
-        "description": "This model predicts the spacing between teeth",
+        "description": "The space between the teeth.",
         "model": torch.load('models/spacing.pth', map_location=device),
         "labels": ['No Spacing', 'Spacing'],
         "edge": False,
         "transform": common_transformer
     }
     tooth_decay_model = {
+        "id": "tooth_decay",
         "title": "Tooth Decay",
-        "description": "This model predicts the tooth decay",
+        "description": "The presence of cavities in the teeth.",
         "model": torch.load('models/tooth-decay.pth', map_location=device),
         "labels": ['Decay', 'No Decay'],
         "edge": False,
@@ -86,6 +117,9 @@ def load_models():
     }
     
     return [lipline_model, smile_arc_model, buccal_model, spacing_model, tooth_decay_model]
+
+
+    
 
 models = load_models()
 
@@ -133,7 +167,7 @@ def predict_from_multiple_models(mouth_crop, models):
 
         predictions.append({
             "title": model['title'],
-            "description": model['description'],
+            "description":  description[model['id']][torch.argmax(probabilities).item()],
             "labels": model['labels'],
             "classes": probabilities.detach().cpu().numpy().tolist()[0],
             "predictedIndex": torch.argmax(probabilities).item()

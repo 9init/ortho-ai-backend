@@ -139,9 +139,9 @@ def crop_mouth(image, landmarks):
         mouth_landmarks = landmarks[0][3:5]
         mouth_box = [
             min(mouth_landmarks[:,0]) - margin,
-            min(mouth_landmarks[:,1]) - margin,
+            min(mouth_landmarks[:,1]) - (margin + 40),
             max(mouth_landmarks[:,0]) + margin,
-            max(mouth_landmarks[:,1]) + margin
+            max(mouth_landmarks[:,1]) + (margin + 80)
         ]
         mouth_crop = image.crop((mouth_box[0], mouth_box[1], mouth_box[2], mouth_box[3])).convert('RGB')
         return mouth_crop
